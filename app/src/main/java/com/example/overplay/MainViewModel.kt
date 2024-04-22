@@ -1,6 +1,7 @@
 package com.example.overplay
 
 import android.hardware.SensorManager
+import android.view.Surface
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.overplay.MainViewState.TiltSensorData
@@ -31,9 +32,16 @@ class MainViewModel : ViewModel() {
     fun dispatch(userAction: MainUserAction) = this.userAction.tryEmit(userAction)
 
     private suspend fun handleUserAction(action: MainUserAction) = when (action) {
-        is MainUserAction.ViewScreen -> Unit
+        is MainUserAction.ViewScreen -> changeOrientation(action.orientation)
         is MainUserAction.SensorChanged -> updateSensorData(action.sensorValues)
         is MainUserAction.ResetViewpointPressed -> resetViewPoint()
+        is MainUserAction.OrientationChanged -> changeOrientation(action.orientation)
+    }
+
+
+    private suspend fun changeOrientation(orientation: Int) {
+        resetViewPoint()
+        updateState { copy(orientation = orientation) }
     }
 
     private suspend fun resetViewPoint() = updateState {
@@ -47,15 +55,20 @@ class MainViewModel : ViewModel() {
 
             val updatedXData = xAxisData.updateAxisData(rotationValues.component1(), isInitialized)
             val updatedYData = yAxisData.updateAxisData(rotationValues.component2(), isInitialized)
+            val updatedZData = zAxisData.updateAxisData(rotationValues.component3(), isInitialized)
 
-            var state = when (updatedYData.offset) {
-                in -180F..-TILT_THRESHOLD -> TiltSensorState.TILTING_DOWN
-                in TILT_THRESHOLD..180F -> TiltSensorState.TILTING_UP
+            val referenceAxis = getAxisByOrientation(orientation, xAxisData, yAxisData, zAxisData)
+            val tiltAxis = referenceAxis.first
+            val yawAxis = referenceAxis.second
+
+            var state = when (yawAxis.offset) {
+                in -MAX_TILT_THRESHOLD..-MIN_TILT_THRESHOLD -> TiltSensorState.TILTING_DOWN
+                in MIN_TILT_THRESHOLD..MAX_TILT_THRESHOLD -> TiltSensorState.TILTING_UP
                 else -> TiltSensorState.IDLE
             }
-            state = if (state == TiltSensorState.IDLE) when (updatedXData.offset) {
-                in -180F..-TILT_THRESHOLD -> TiltSensorState.TILTING_LEFT
-                in TILT_THRESHOLD..180F -> TiltSensorState.TILTING_RIGHT
+            state = if (state == TiltSensorState.IDLE) when (tiltAxis.offset) {
+                in -MAX_TILT_THRESHOLD..-MIN_TILT_THRESHOLD -> TiltSensorState.TILTING_LEFT
+                in MIN_TILT_THRESHOLD..MAX_TILT_THRESHOLD -> TiltSensorState.TILTING_RIGHT
                 else -> TiltSensorState.IDLE
             } else state
 
@@ -64,9 +77,29 @@ class MainViewModel : ViewModel() {
                     isInitialized = true,
                     tiltState = state,
                     xAxisData = updatedXData,
-                    yAxisData = updatedYData
+                    yAxisData = updatedYData,
+                    zAxisData = updatedZData
                 )
             )
+        }
+    }
+
+    private fun getAxisByOrientation(
+        orientation: Int,
+        xAxisData: TiltSensorData.AxisData,
+        yAxisData: TiltSensorData.AxisData,
+        zAxisData: TiltSensorData.AxisData,
+    ): Pair<TiltSensorData.AxisData, TiltSensorData.AxisData> {
+        return when (orientation) {
+            Surface.ROTATION_0 -> xAxisData
+            Surface.ROTATION_90 -> yAxisData.invert()
+            Surface.ROTATION_180 -> xAxisData.invert()
+            else -> yAxisData
+        } to when (orientation) {
+            Surface.ROTATION_0 -> yAxisData
+            Surface.ROTATION_90 -> zAxisData
+            Surface.ROTATION_180 -> yAxisData.invert()
+            else -> zAxisData.invert()
         }
     }
 
@@ -78,9 +111,9 @@ class MainViewModel : ViewModel() {
         SensorManager.getOrientation(rotationMatrix, orientationAngles)
 
         return floatArrayOf(
-            Math.toDegrees(orientationAngles[0].toDouble()).toFloat(),
-            Math.toDegrees(orientationAngles[1].toDouble()).toFloat(),
-            Math.toDegrees(orientationAngles[2].toDouble()).toFloat()
+            Math.toDegrees(orientationAngles.component1().toDouble()).toFloat(),
+            Math.toDegrees(orientationAngles.component2().toDouble()).toFloat(),
+            Math.toDegrees(orientationAngles.component3().toDouble()).toFloat()
         )
     }
 
@@ -90,12 +123,17 @@ class MainViewModel : ViewModel() {
         return copy(current = sensorValue, origin = origin, offset = offset)
     }
 
+    private fun TiltSensorData.AxisData.invert(): TiltSensorData.AxisData {
+        return copy(current = -current, origin = -origin, offset = -offset)
+    }
+
     private suspend fun updateState(reduce: (MainViewState.() -> MainViewState)) {
         _mainStateFlow.value.let { _mainStateFlow.emit(reduce(it)) }
     }
 
     companion object {
-        const val TILT_THRESHOLD = 20F
+        const val MIN_TILT_THRESHOLD = 20F
+        const val MAX_TILT_THRESHOLD = 60F
     }
 
 }
