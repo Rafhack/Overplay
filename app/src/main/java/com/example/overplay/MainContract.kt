@@ -1,6 +1,5 @@
 package com.example.overplay
 
-import android.content.res.Configuration
 import android.view.Surface
 import com.example.overplay.MainViewState.TiltSensorData.TiltSensorState
 
@@ -57,7 +56,7 @@ data class MainViewState(
 sealed class MainUserAction {
     data class ViewScreen(val orientation: Int) : MainUserAction()
 
-    data class OrientationChanged(val orientation: Int): MainUserAction()
+    data class OrientationChanged(val orientation: Int) : MainUserAction()
     data object ResetViewpointPressed : MainUserAction()
     data class SensorChanged(val sensorValues: FloatArray) : MainUserAction()
 }
