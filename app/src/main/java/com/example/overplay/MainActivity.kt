@@ -15,16 +15,23 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.media3.common.MediaItem
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import com.example.overplay.MainViewState.TiltSensorData.TiltSensorState
 import com.example.overplay.databinding.ActivityMainBinding
 import kotlinx.coroutines.launch
 
+@UnstableApi
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private val viewModel: MainViewModel by viewModels()
-    private val exoPlayer by lazy { ExoPlayer.Builder(this).build() }
+    private val exoPlayer by lazy {
+        ExoPlayer.Builder(this)
+            .setSeekBackIncrementMs(100L)
+            .setSeekForwardIncrementMs(100L)
+            .build()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,7 +39,9 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        viewModel.dispatch(MainUserAction.ViewScreen(resources.configuration.orientation))
+        val rotation = ContextCompat.getDisplayOrDefault(this).rotation
+        viewModel.dispatch(MainUserAction.ViewScreen(rotation))
+
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.mainStateFlow.collect(::renderViewState)
@@ -72,22 +81,27 @@ class MainActivity : AppCompatActivity() {
     private fun volumeUp() = with(binding) {
         hideIndicators()
         frameVolumeUpIndicator.isVisible = true
+        exoPlayer.volume += .05F
     }
 
     private fun volumeDown() = with(binding) {
         hideIndicators()
         frameVolumeDownIndicator.isVisible = true
+        exoPlayer.volume -= .05F
     }
-
 
     private fun rewind() = with(binding) {
         hideIndicators()
         frameRewindIndicator.isVisible = true
+        exoPlayer.seekBack()
+        playerView.showController()
     }
 
     private fun fastForward() = with(binding) {
         hideIndicators()
         frameFastForwardIndicator.isVisible = true
+        exoPlayer.seekForward()
+        playerView.showController()
     }
 
     private fun setupListeners() = with(binding) {
