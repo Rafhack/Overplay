@@ -14,7 +14,7 @@ data class MainViewState(
     data class TiltSensorData(
         val isInitialized: Boolean,
         val xAxisData: AxisData,
-        val zAxisData: AxisData,
+        val yAxisData: AxisData,
         val tiltState: TiltSensorState,
     ) {
         enum class TiltSensorState {
@@ -29,11 +29,7 @@ data class MainViewState(
             val current: Float = 0F,
             val origin: Float = 0F,
             val offset: Float = 0F
-        ) {
-            override fun toString(): String {
-                return "Current: $current, Origin: $origin, Offset: $offset"
-            }
-        }
+        )
     }
 
     companion object {
@@ -44,27 +40,16 @@ data class MainViewState(
             tiltSensorData = TiltSensorData(
                 isInitialized = false,
                 xAxisData = TiltSensorData.AxisData(),
-                zAxisData = TiltSensorData.AxisData(),
+                yAxisData = TiltSensorData.AxisData(),
                 tiltState = TiltSensorState.IDLE
             )
         )
     }
 }
 
+@Suppress("ArrayInDataClass")
 sealed class MainUserAction {
     data object ViewScreen : MainUserAction()
-    data class SensorChanged(val sensorValues: FloatArray) : MainUserAction() {
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
-
-            other as SensorChanged
-
-            return sensorValues.contentEquals(other.sensorValues)
-        }
-
-        override fun hashCode(): Int {
-            return sensorValues.contentHashCode()
-        }
-    }
+    data object ResetViewpointPressed : MainUserAction()
+    data class SensorChanged(val sensorValues: FloatArray) : MainUserAction()
 }

@@ -27,7 +27,6 @@ class MainActivity : AppCompatActivity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        initAccelerometer()
 
         viewModel.dispatch(MainUserAction.ViewScreen)
         lifecycleScope.launch {
@@ -35,34 +34,56 @@ class MainActivity : AppCompatActivity() {
                 viewModel.mainStateFlow.collect(::renderViewState)
             }
         }
+
+        initAccelerometer()
+        setupListeners()
     }
 
     private fun renderViewState(viewState: MainViewState) {
         handleTiltState(viewState.tiltSensorData.tiltState)
-        Log.d("Sensor", "X: ${viewState.tiltSensorData.xAxisData.offset}, Z: ${viewState.tiltSensorData.zAxisData.offset}")
+        Log.d("Sensor", "X: ${viewState.tiltSensorData.xAxisData.offset}, Y: ${viewState.tiltSensorData.yAxisData.offset}")
     }
 
     private fun handleTiltState(state: TiltSensorState) = when (state) {
         TiltSensorState.TILTING_LEFT -> rewind()
         TiltSensorState.TILTING_RIGHT -> fastForward()
-        TiltSensorState.TILTING_UP -> TODO()
-        TiltSensorState.TILTING_DOWN -> TODO()
+        TiltSensorState.TILTING_UP -> volumeUp()
+        TiltSensorState.TILTING_DOWN -> volumeDown()
         TiltSensorState.IDLE -> hideIndicators()
     }
 
-    private fun hideIndicators() {
-        binding.frameRewindIndicator.isVisible = false
-        binding.frameFastForwardIndicator.isVisible = false
+    private fun hideIndicators() = with(binding) {
+        frameRewindIndicator.isVisible = false
+        frameFastForwardIndicator.isVisible = false
+        frameVolumeUpIndicator.isVisible = false
+        frameVolumeDownIndicator.isVisible = false
     }
 
-    private fun rewind() {
-        binding.frameRewindIndicator.isVisible = true
-        binding.frameFastForwardIndicator.isVisible = false
+    private fun volumeUp() = with(binding) {
+        hideIndicators()
+        frameVolumeUpIndicator.isVisible = true
     }
 
-    private fun fastForward() {
-        binding.frameFastForwardIndicator.isVisible = true
-        binding.frameRewindIndicator.isVisible = false
+    private fun volumeDown() = with(binding) {
+        hideIndicators()
+        frameVolumeDownIndicator.isVisible = true
+    }
+
+
+    private fun rewind() = with(binding) {
+        hideIndicators()
+        frameRewindIndicator.isVisible = true
+    }
+
+    private fun fastForward() = with(binding) {
+        hideIndicators()
+        frameFastForwardIndicator.isVisible = true
+    }
+
+    private fun setupListeners() = with(binding) {
+        buttonResetViewpoint.setOnClickListener {
+            viewModel.dispatch(MainUserAction.ResetViewpointPressed)
+        }
     }
 
     private fun initAccelerometer() {

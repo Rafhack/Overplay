@@ -33,31 +33,40 @@ class MainViewModel : ViewModel() {
     private suspend fun handleUserAction(action: MainUserAction) = when (action) {
         is MainUserAction.ViewScreen -> Unit
         is MainUserAction.SensorChanged -> updateSensorData(action.sensorValues)
+        is MainUserAction.ResetViewpointPressed -> resetViewPoint()
     }
 
-    private suspend fun updateSensorData(sensorValues: FloatArray) {
-        updateState {
-            with(tiltSensorData) {
+    private suspend fun resetViewPoint() = updateState {
+        copy(tiltSensorData = tiltSensorData.copy(isInitialized = false, tiltState = TiltSensorState.IDLE))
+    }
 
-                val rotationValues = getRotation(sensorValues)
+    private suspend fun updateSensorData(sensorValues: FloatArray) = updateState {
+        with(tiltSensorData) {
 
-                val updatedXData = xAxisData.updateAxisData(rotationValues.component1(), isInitialized)
-                val updatedZData = zAxisData.updateAxisData(rotationValues.component3(), isInitialized)
+            val rotationValues = getRotation(sensorValues)
 
-                val state = when (updatedZData.offset) {
-                    in -180F..-10F -> TiltSensorState.TILTING_LEFT
-                    in 10F..180F -> TiltSensorState.TILTING_RIGHT
-                    else -> TiltSensorState.IDLE
-                }
-                copy(
-                    tiltSensorData = tiltSensorData.copy(
-                        isInitialized = true,
-                        tiltState = state,
-                        xAxisData = updatedXData,
-                        zAxisData = updatedZData
-                    )
-                )
+            val updatedXData = xAxisData.updateAxisData(rotationValues.component1(), isInitialized)
+            val updatedYData = yAxisData.updateAxisData(rotationValues.component2(), isInitialized)
+
+            var state = when (updatedYData.offset) {
+                in -180F..-TILT_THRESHOLD -> TiltSensorState.TILTING_DOWN
+                in TILT_THRESHOLD..180F -> TiltSensorState.TILTING_UP
+                else -> TiltSensorState.IDLE
             }
+            state = if (state == TiltSensorState.IDLE) when (updatedXData.offset) {
+                in -180F..-TILT_THRESHOLD -> TiltSensorState.TILTING_LEFT
+                in TILT_THRESHOLD..180F -> TiltSensorState.TILTING_RIGHT
+                else -> TiltSensorState.IDLE
+            } else state
+
+            copy(
+                tiltSensorData = tiltSensorData.copy(
+                    isInitialized = true,
+                    tiltState = state,
+                    xAxisData = updatedXData,
+                    yAxisData = updatedYData
+                )
+            )
         }
     }
 
@@ -86,7 +95,7 @@ class MainViewModel : ViewModel() {
     }
 
     companion object {
-        const val NS2S = 1.0F / 1000000000.0F
+        const val TILT_THRESHOLD = 20F
     }
 
 }

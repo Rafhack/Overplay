@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Overplay</string>
+    <string name="reset_viewpoint">Reset viewpoint</string>
 </resources>
