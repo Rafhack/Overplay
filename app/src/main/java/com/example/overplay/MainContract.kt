@@ -63,7 +63,7 @@ sealed class MainUserAction {
 
     data class IsPlayingChanged(val isPlaying: Boolean) : MainUserAction()
 
-    data object ResetViewpointPressed : MainUserAction()
+    data object SetViewpointPressed : MainUserAction()
 }
 
 sealed class MainSideEffect {

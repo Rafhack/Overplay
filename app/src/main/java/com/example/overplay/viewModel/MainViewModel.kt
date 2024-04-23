@@ -16,7 +16,7 @@ class MainViewModel : BaseViewModel<MainUserAction, MainSideEffect, MainViewStat
     override suspend fun handleUserAction(action: MainUserAction) = when (action) {
         is MainUserAction.ViewScreen -> startup(action.orientation)
         is MainUserAction.SensorChanged -> updateSensorData(action.sensorValues)
-        is MainUserAction.ResetViewpointPressed -> resetViewPoint()
+        is MainUserAction.SetViewpointPressed -> setViewPoint()
         is MainUserAction.OrientationChanged -> changeOrientation(action.orientation)
         is MainUserAction.DeviceShaken -> handleDeviceShakeEvent(action.timestamp)
         is MainUserAction.PlaybackStateChanged -> updatePlaybackState(action.playbackState)
@@ -48,11 +48,11 @@ class MainViewModel : BaseViewModel<MainUserAction, MainSideEffect, MainViewStat
     }
 
     private suspend fun changeOrientation(orientation: Int) {
-        resetViewPoint()
+        setViewPoint()
         updateState { copy(orientation = orientation) }
     }
 
-    private suspend fun resetViewPoint() = updateState {
+    private suspend fun setViewPoint() = updateState {
         copy(tiltSensorData = tiltSensorData.copy(isInitialized = false, tiltState = TiltSensorState.IDLE))
     }
 

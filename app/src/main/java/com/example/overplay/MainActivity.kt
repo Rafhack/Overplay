@@ -166,8 +166,8 @@ class MainActivity : AppCompatActivity() {
     // endregion
 
     private fun setupListeners() = with(binding) {
-        buttonResetViewpoint.setOnClickListener {
-            viewModel.dispatch(MainUserAction.ResetViewpointPressed)
+        buttonSetViewpoint.setOnClickListener {
+            viewModel.dispatch(MainUserAction.SetViewpointPressed)
         }
     }
 
