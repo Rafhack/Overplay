@@ -123,13 +123,13 @@ class MainActivity : AppCompatActivity() {
 
     // region Private methods
     private fun handleSideEffect(sideEffect: MainSideEffect) {
-        Log.d("SideEffect", sideEffect.javaClass.simpleName)
         when (sideEffect) {
             is MainSideEffect.LoadVideo -> preparePlayer(sideEffect.videoUrl)
             is MainSideEffect.PauseVideo -> exoPlayer.pause()
             is MainSideEffect.PlayVideo -> exoPlayer.play()
             is MainSideEffect.PauseLocationUpdates -> stopLocationUpdates()
             is MainSideEffect.StartLocationUpdates -> startLocationUpdates()
+            is MainSideEffect.ResetVideo -> resetVideo()
         }
     }
 
@@ -208,6 +208,11 @@ class MainActivity : AppCompatActivity() {
         .setSeekBackIncrementMs(PLAYER_SEEK_INTERVAL)
         .setSeekForwardIncrementMs(PLAYER_SEEK_INTERVAL)
         .build()
+
+    private fun resetVideo() {
+        exoPlayer.seekTo(0)
+        exoPlayer.play()
+    }
 
     private fun volumeUp() = with(binding) {
         hideIndicators()

@@ -43,7 +43,7 @@ class MainViewModel : BaseViewModel<MainUserAction, MainSideEffect, MainViewStat
                 val distance = lastLocation.distanceTo(currentLocation)
                 updateState { copy(lastLocationDistance = distance) }
                 if (distance >= LOCATION_DISTANCE_TRIGGER) {
-                    emitSideEffect(MainSideEffect.PauseVideo)
+                    emitSideEffect(MainSideEffect.ResetVideo)
                     updateState { copy(lastLocation = currentLocation) }
                 }
             } else {
@@ -54,7 +54,6 @@ class MainViewModel : BaseViewModel<MainUserAction, MainSideEffect, MainViewStat
 
     private suspend fun pauseVideoAndLocation() {
         if (stateFlow.value.isVideoPlaying) {
-            Log.d("SideEffect", "Video IsPlaying")
             emitSideEffect(MainSideEffect.PauseVideo)
         }
         if (stateFlow.value.isLocationInitialized) {

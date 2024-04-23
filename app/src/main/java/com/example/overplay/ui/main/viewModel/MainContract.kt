@@ -67,6 +67,7 @@ sealed class MainSideEffect {
     data class LoadVideo(val videoUrl: String) : MainSideEffect()
     data object PlayVideo : MainSideEffect()
     data object PauseVideo : MainSideEffect()
+    data object ResetVideo : MainSideEffect()
 
     data object StartLocationUpdates : MainSideEffect()
     data object PauseLocationUpdates : MainSideEffect()
