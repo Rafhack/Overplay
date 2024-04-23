@@ -15,24 +15,27 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import com.example.overplay.MainViewState.TiltSensorData.TiltSensorState
 import com.example.overplay.databinding.ActivityMainBinding
+import com.example.overplay.viewModel.MainViewModel
 import kotlinx.coroutines.launch
 
 @UnstableApi
 class MainActivity : AppCompatActivity() {
 
+    // region Global variables
     private lateinit var binding: ActivityMainBinding
-    private val viewModel: MainViewModel by viewModels()
-    private val exoPlayer by lazy {
-        ExoPlayer.Builder(this)
-            .setSeekBackIncrementMs(100L)
-            .setSeekForwardIncrementMs(100L)
-            .build()
-    }
+    private lateinit var shakeDetector: ShakeDetector
 
+    private val sensorManager by lazy { getSystemService(Context.SENSOR_SERVICE) as SensorManager }
+    private val exoPlayer by lazy { createPlayer() }
+    private val viewModel: MainViewModel by viewModels()
+    // endregion
+
+    // region Activity overridden methods
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -44,19 +47,37 @@ class MainActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.mainStateFlow.collect(::renderViewState)
+                launch { viewModel.stateFlow.collect(::renderViewState) }
+                launch { viewModel.sideEffect.collect(::handleSideEffect) }
             }
         }
 
-        initAccelerometer()
-        setupListeners()
+        initGyroscope()
+        initShakeDetector()
         initPlayer()
+        setupListeners()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        shakeDetector.stop()
+        exoPlayer.release()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         val rotation = ContextCompat.getDisplayOrDefault(this).rotation
         viewModel.dispatch(MainUserAction.OrientationChanged(rotation))
+    }
+    // endregion
+
+    // region Private methods
+    private fun handleSideEffect(sideEffect: MainSideEffect) {
+        when (sideEffect) {
+            is MainSideEffect.LoadVideo -> preparePlayer(sideEffect.videoUrl)
+            MainSideEffect.PauseVideo -> exoPlayer.pause()
+            MainSideEffect.PlayVideo -> exoPlayer.play()
+        }
     }
 
     private fun renderViewState(viewState: MainViewState) {
@@ -77,6 +98,12 @@ class MainActivity : AppCompatActivity() {
         frameVolumeUpIndicator.isVisible = false
         frameVolumeDownIndicator.isVisible = false
     }
+
+    // region Player methods
+    private fun createPlayer() = ExoPlayer.Builder(this)
+        .setSeekBackIncrementMs(100L)
+        .setSeekForwardIncrementMs(100L)
+        .build()
 
     private fun volumeUp() = with(binding) {
         hideIndicators()
@@ -104,26 +131,42 @@ class MainActivity : AppCompatActivity() {
         playerView.showController()
     }
 
+    private fun preparePlayer(videoUrl: String) {
+        val mediaItem = MediaItem.fromUri(videoUrl)
+        exoPlayer.setMediaItem(mediaItem)
+        exoPlayer.prepare()
+    }
+
+    private fun initPlayer() = with(binding) {
+        playerView.player = exoPlayer
+
+        exoPlayer.addListener(object : Player.Listener {
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                super.onPlaybackStateChanged(playbackState)
+                viewModel.dispatch(MainUserAction.PlaybackStateChanged(playbackState))
+            }
+
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                super.onIsPlayingChanged(isPlaying)
+                viewModel.dispatch(MainUserAction.IsPlayingChanged(isPlaying))
+            }
+        })
+    }
+    // endregion
+
     private fun setupListeners() = with(binding) {
         buttonResetViewpoint.setOnClickListener {
             viewModel.dispatch(MainUserAction.ResetViewpointPressed)
         }
     }
 
-    private fun initPlayer() = with(binding) {
-        val mediaItem = MediaItem.fromUri(VIDEO_URL)
-        playerView.player = exoPlayer
-        exoPlayer.setMediaItem(mediaItem)
-        exoPlayer.prepare()
-        exoPlayer.play()
-    }
-
-    private fun initAccelerometer() {
-        val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+    // region Sensor Listeners
+    private fun initGyroscope() {
         val sensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
         sensorManager.registerListener(object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent?) {
                 event?.let {
+                    event.timestamp
                     viewModel.dispatch(MainUserAction.SensorChanged(it.values))
                 }
             }
@@ -132,7 +175,19 @@ class MainActivity : AppCompatActivity() {
         }, sensor, SensorManager.SENSOR_DELAY_UI)
     }
 
-    companion object {
-        private const val VIDEO_URL = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4"
+    /**
+     * Uses the [ShakeDetector] class from Square's library Seismic
+     * Slightly modified to return the timestamp for each shake, so
+     * we can ignore shake events too close from one another
+     * */
+    private fun initShakeDetector() {
+        shakeDetector = ShakeDetector(object : ShakeDetector.Listener {
+            override fun hearShake(timestamp: Long) {
+                viewModel.dispatch(MainUserAction.DeviceShaken(timestamp))
+            }
+        })
+        shakeDetector.start(sensorManager, SensorManager.SENSOR_DELAY_GAME)
     }
+    // endregion
+    // endregion
 }

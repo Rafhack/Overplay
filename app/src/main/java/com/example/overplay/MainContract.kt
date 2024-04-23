@@ -1,18 +1,16 @@
 package com.example.overplay
 
 import android.view.Surface
+import androidx.media3.common.Player
 import com.example.overplay.MainViewState.TiltSensorData.TiltSensorState
 
 data class MainViewState(
-    val playerState: PlayerState,
     val tiltSensorData: TiltSensorData,
-    val orientation: Int
+    val orientation: Int,
+    val playbackState: Int,
+    val isVideoPlaying: Boolean,
+    val lastShakeEventTimestamp: Long
 ) {
-
-    data class PlayerState(
-        val isLoading: Boolean
-    )
-
     data class TiltSensorData(
         val isInitialized: Boolean,
         val xAxisData: AxisData,
@@ -37,17 +35,17 @@ data class MainViewState(
 
     companion object {
         val INITIAL_STATE = MainViewState(
-            playerState = PlayerState(
-                isLoading = true
-            ),
+            playbackState = Player.STATE_IDLE,
+            isVideoPlaying = false,
+            lastShakeEventTimestamp = 0L,
+            orientation = Surface.ROTATION_0,
             tiltSensorData = TiltSensorData(
                 isInitialized = false,
                 xAxisData = TiltSensorData.AxisData(),
                 yAxisData = TiltSensorData.AxisData(),
                 zAxisData = TiltSensorData.AxisData(),
                 tiltState = TiltSensorState.IDLE
-            ),
-            orientation = Surface.ROTATION_0
+            )
         )
     }
 }
@@ -57,6 +55,18 @@ sealed class MainUserAction {
     data class ViewScreen(val orientation: Int) : MainUserAction()
 
     data class OrientationChanged(val orientation: Int) : MainUserAction()
-    data object ResetViewpointPressed : MainUserAction()
     data class SensorChanged(val sensorValues: FloatArray) : MainUserAction()
+    data class DeviceShaken(val timestamp: Long) : MainUserAction()
+
+    data class PlaybackStateChanged(val playbackState: Int) : MainUserAction()
+
+    data class IsPlayingChanged(val isPlaying: Boolean) : MainUserAction()
+
+    data object ResetViewpointPressed : MainUserAction()
+}
+
+sealed class MainSideEffect {
+    data class LoadVideo(val videoUrl: String) : MainSideEffect()
+    data object PlayVideo : MainSideEffect()
+    data object PauseVideo : MainSideEffect()
 }
