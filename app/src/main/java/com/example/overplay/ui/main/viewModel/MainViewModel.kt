@@ -1,11 +1,8 @@
-package com.example.overplay.viewModel
+package com.example.overplay.ui.main.viewModel
 
 import androidx.media3.common.Player
-import com.example.overplay.MainSideEffect
-import com.example.overplay.MainUserAction
-import com.example.overplay.MainViewState
-import com.example.overplay.MainViewState.TiltSensorData.TiltSensorState
-import com.example.overplay.SensorUseCase
+import com.example.overplay.ui.main.viewModel.MainViewState.TiltSensorData.TiltSensorState
+import com.example.overplay.domain.SensorUseCase
 
 class MainViewModel : BaseViewModel<MainUserAction, MainSideEffect, MainViewState>(
     MainViewState.INITIAL_STATE

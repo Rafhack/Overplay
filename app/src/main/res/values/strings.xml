@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">Overplay</string>
     <string name="set_viewpoint">Set viewpoint</string>
+
+    <string name="permission_settings_dialog_title">Allow location access</string>
+    <string name="permission_settings_dialog_message">To proceed, please allow the access to location in your settings</string>
+    <string name="permission_settings_dialog_open">Open settings</string>
+    <string name="permission_settings_dialog_cancel">Cancel</string>
 </resources>

@@ -1,4 +1,4 @@
-package com.example.overplay
+package com.example.overplay.ui.main
 
 import android.content.Context
 import android.content.res.Configuration
@@ -18,9 +18,13 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
-import com.example.overplay.MainViewState.TiltSensorData.TiltSensorState
+import com.example.overplay.ui.main.viewModel.MainSideEffect
+import com.example.overplay.ui.main.viewModel.MainUserAction
+import com.example.overplay.ui.main.viewModel.MainViewState
+import com.example.overplay.ui.main.viewModel.MainViewState.TiltSensorData.TiltSensorState
+import com.example.overplay.helpers.ShakeDetector
 import com.example.overplay.databinding.ActivityMainBinding
-import com.example.overplay.viewModel.MainViewModel
+import com.example.overplay.ui.main.viewModel.MainViewModel
 import kotlinx.coroutines.launch
 
 @UnstableApi

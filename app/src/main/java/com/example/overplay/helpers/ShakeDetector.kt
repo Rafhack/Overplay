@@ -1,4 +1,4 @@
-package com.example.overplay
+package com.example.overplay.helpers
 
 import android.hardware.Sensor
 import android.hardware.SensorEvent

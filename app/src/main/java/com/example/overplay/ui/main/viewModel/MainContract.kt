@@ -1,8 +1,8 @@
-package com.example.overplay
+package com.example.overplay.ui.main.viewModel
 
 import android.view.Surface
 import androidx.media3.common.Player
-import com.example.overplay.MainViewState.TiltSensorData.TiltSensorState
+import com.example.overplay.ui.main.viewModel.MainViewState.TiltSensorData.TiltSensorState
 
 data class MainViewState(
     val tiltSensorData: TiltSensorData,

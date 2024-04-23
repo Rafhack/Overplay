@@ -1,4 +1,4 @@
-package com.example.overplay.viewModel
+package com.example.overplay.ui.main.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

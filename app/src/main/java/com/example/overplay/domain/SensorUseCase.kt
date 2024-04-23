@@ -1,8 +1,9 @@
-package com.example.overplay
+package com.example.overplay.domain
 
 import android.hardware.SensorManager
 import android.view.Surface
-import com.example.overplay.MainViewState.TiltSensorData.TiltSensorState
+import com.example.overplay.ui.main.viewModel.MainViewState
+import com.example.overplay.ui.main.viewModel.MainViewState.TiltSensorData.TiltSensorState
 
 class SensorUseCase {
 
