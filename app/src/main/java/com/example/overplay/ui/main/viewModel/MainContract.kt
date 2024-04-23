@@ -1,5 +1,6 @@
 package com.example.overplay.ui.main.viewModel
 
+import android.location.Location
 import android.view.Surface
 import androidx.media3.common.Player
 import com.example.overplay.ui.main.viewModel.MainViewState.TiltSensorData.TiltSensorState
@@ -10,7 +11,8 @@ data class MainViewState(
     val playbackState: Int,
     val isVideoPlaying: Boolean,
     val lastShakeEventTimestamp: Long,
-    val isLocationInitialized: Boolean
+    val isLocationInitialized: Boolean,
+    val lastLocation: Location?
 ) {
     data class TiltSensorData(
         val isInitialized: Boolean,
@@ -41,6 +43,7 @@ data class MainViewState(
             lastShakeEventTimestamp = 0L,
             isLocationInitialized = false,
             orientation = Surface.ROTATION_0,
+            lastLocation = null,
             tiltSensorData = TiltSensorData(
                 isInitialized = false,
                 xAxisData = TiltSensorData.AxisData(),
@@ -72,6 +75,8 @@ sealed class MainUserAction {
     data class ActivityResumed(val hasLocationPermission: Boolean) : MainUserAction()
 
     data object OnLocationPermissionGranted : MainUserAction()
+
+    data class LocationUpdated(val location: Location?) : MainUserAction()
 }
 
 sealed class MainSideEffect {

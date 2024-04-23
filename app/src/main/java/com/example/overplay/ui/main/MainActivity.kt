@@ -155,7 +155,7 @@ class MainActivity : AppCompatActivity() {
     private fun initLocationCallback() {
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
-                locationResult.lastLocation
+                viewModel.dispatch(MainUserAction.LocationUpdated(locationResult.lastLocation))
             }
         }
     }

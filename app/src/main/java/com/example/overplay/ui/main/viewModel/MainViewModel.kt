@@ -1,5 +1,6 @@
 package com.example.overplay.ui.main.viewModel
 
+import android.location.Location
 import android.util.Log
 import androidx.media3.common.Player
 import com.example.overplay.domain.SensorUseCase
@@ -21,12 +22,28 @@ class MainViewModel : BaseViewModel<MainUserAction, MainSideEffect, MainViewStat
         is MainUserAction.IsPlayingChanged -> updatePlayingState(action.isPlaying)
         is MainUserAction.ActivityPaused -> pauseVideoAndLocation()
         is MainUserAction.ActivityResumed -> resumeVideoAndLocation(action.hasLocationPermission)
+        is MainUserAction.LocationUpdated -> checkForLocationDistance(action.location)
         is MainUserAction.OnLocationPermissionGranted -> emitSideEffect(MainSideEffect.StartLocationUpdates)
     }
 
     private suspend fun startup(orientation: Int) {
         changeOrientation(orientation)
         emitSideEffect(MainSideEffect.LoadVideo(VIDEO_URL))
+    }
+
+    private suspend fun checkForLocationDistance(currentLocation: Location?) {
+        currentLocation?.let {
+            val lastLocation = stateFlow.value.lastLocation
+            if (lastLocation != null) {
+                val distance = lastLocation.distanceTo(currentLocation)
+                if (distance >= LOCATION_DISTANCE_TRIGGER) {
+                    emitSideEffect(MainSideEffect.PauseVideo)
+                    updateState { copy(lastLocation = currentLocation) }
+                }
+            } else {
+                updateState { copy(lastLocation = currentLocation) }
+            }
+        }
     }
 
     private suspend fun pauseVideoAndLocation() {
@@ -84,6 +101,7 @@ class MainViewModel : BaseViewModel<MainUserAction, MainSideEffect, MainViewStat
     }
 
     companion object {
+        private const val LOCATION_DISTANCE_TRIGGER = 10
         private const val MIN_SHAKE_INTERVAL = 1000
         private const val VIDEO_URL = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4"
     }
