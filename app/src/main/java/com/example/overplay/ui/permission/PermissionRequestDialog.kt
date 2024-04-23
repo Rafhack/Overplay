@@ -29,7 +29,7 @@ class PermissionRequestDialog(context: Activity, permissionManager: PermissionMa
                         return if (AndroidVersion.isAndroidS) {
                             permissionManager.hasPermissions(
                                 context,
-                                arrayOf(permission.BLUETOOTH_CONNECT, permission.BLUETOOTH_SCAN),
+                                arrayOf(permission.ACCESS_FINE_LOCATION, permission.ACCESS_COARSE_LOCATION),
                             )
                         } else {
                             true

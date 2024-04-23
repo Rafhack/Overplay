@@ -16,14 +16,16 @@ abstract class BaseViewModel<UserAction, SideEffect : Any, ViewState : Any>(
     val stateFlow get() = _stateFlow.asStateFlow()
 
     private val _sideEffect = MutableSharedFlow<SideEffect>(
-        replay = 1,
+        replay = FLOW_REPLAY_COUNT,
+        extraBufferCapacity = FLOW_EXTRA_BUFFER_CAPACITY,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
     val sideEffect get() = _sideEffect.asSharedFlow()
 
     private val userAction = MutableSharedFlow<UserAction>(
-        replay = 1,
+        replay = FLOW_REPLAY_COUNT,
+        extraBufferCapacity = FLOW_EXTRA_BUFFER_CAPACITY,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
@@ -44,4 +46,9 @@ abstract class BaseViewModel<UserAction, SideEffect : Any, ViewState : Any>(
     }
 
     fun dispatch(action: UserAction) = userAction.tryEmit(action)
+
+    companion object {
+        private const val FLOW_EXTRA_BUFFER_CAPACITY = 20
+        private const val FLOW_REPLAY_COUNT = 1
+    }
 }

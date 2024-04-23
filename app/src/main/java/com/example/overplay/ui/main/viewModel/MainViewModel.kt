@@ -1,8 +1,9 @@
 package com.example.overplay.ui.main.viewModel
 
+import android.util.Log
 import androidx.media3.common.Player
-import com.example.overplay.ui.main.viewModel.MainViewState.TiltSensorData.TiltSensorState
 import com.example.overplay.domain.SensorUseCase
+import com.example.overplay.ui.main.viewModel.MainViewState.TiltSensorData.TiltSensorState
 
 class MainViewModel : BaseViewModel<MainUserAction, MainSideEffect, MainViewState>(
     MainViewState.INITIAL_STATE
@@ -18,11 +19,34 @@ class MainViewModel : BaseViewModel<MainUserAction, MainSideEffect, MainViewStat
         is MainUserAction.DeviceShaken -> handleDeviceShakeEvent(action.timestamp)
         is MainUserAction.PlaybackStateChanged -> updatePlaybackState(action.playbackState)
         is MainUserAction.IsPlayingChanged -> updatePlayingState(action.isPlaying)
+        is MainUserAction.ActivityPaused -> pauseVideoAndLocation()
+        is MainUserAction.ActivityResumed -> resumeVideoAndLocation(action.hasLocationPermission)
+        is MainUserAction.OnLocationPermissionGranted -> emitSideEffect(MainSideEffect.StartLocationUpdates)
     }
 
     private suspend fun startup(orientation: Int) {
         changeOrientation(orientation)
         emitSideEffect(MainSideEffect.LoadVideo(VIDEO_URL))
+    }
+
+    private suspend fun pauseVideoAndLocation() {
+        if (stateFlow.value.isVideoPlaying) {
+            Log.d("SideEffect", "Video IsPlaying")
+            emitSideEffect(MainSideEffect.PauseVideo)
+        }
+        if (stateFlow.value.isLocationInitialized) {
+            emitSideEffect(MainSideEffect.PauseLocationUpdates)
+        }
+    }
+
+    private suspend fun resumeVideoAndLocation(hasLocationPermission: Boolean) {
+        if (stateFlow.value.playbackState == Player.STATE_READY) {
+            emitSideEffect(MainSideEffect.PlayVideo)
+        }
+        if (hasLocationPermission) {
+            updateState { copy(isLocationInitialized = true) }
+            emitSideEffect(MainSideEffect.StartLocationUpdates)
+        }
     }
 
     private suspend fun updatePlaybackState(playbackState: Int) {

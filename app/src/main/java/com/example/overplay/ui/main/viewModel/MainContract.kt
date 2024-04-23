@@ -9,7 +9,8 @@ data class MainViewState(
     val orientation: Int,
     val playbackState: Int,
     val isVideoPlaying: Boolean,
-    val lastShakeEventTimestamp: Long
+    val lastShakeEventTimestamp: Long,
+    val isLocationInitialized: Boolean
 ) {
     data class TiltSensorData(
         val isInitialized: Boolean,
@@ -38,6 +39,7 @@ data class MainViewState(
             playbackState = Player.STATE_IDLE,
             isVideoPlaying = false,
             lastShakeEventTimestamp = 0L,
+            isLocationInitialized = false,
             orientation = Surface.ROTATION_0,
             tiltSensorData = TiltSensorData(
                 isInitialized = false,
@@ -64,10 +66,19 @@ sealed class MainUserAction {
     data class IsPlayingChanged(val isPlaying: Boolean) : MainUserAction()
 
     data object SetViewpointPressed : MainUserAction()
+
+    data object ActivityPaused : MainUserAction()
+
+    data class ActivityResumed(val hasLocationPermission: Boolean) : MainUserAction()
+
+    data object OnLocationPermissionGranted : MainUserAction()
 }
 
 sealed class MainSideEffect {
     data class LoadVideo(val videoUrl: String) : MainSideEffect()
     data object PlayVideo : MainSideEffect()
     data object PauseVideo : MainSideEffect()
+
+    data object StartLocationUpdates : MainSideEffect()
+    data object PauseLocationUpdates : MainSideEffect()
 }

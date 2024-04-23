@@ -1,5 +1,6 @@
 package com.example.overplay.ui.main
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
@@ -9,6 +10,7 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
 import android.os.Looper
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -19,7 +21,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
-import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import com.example.overplay.R
@@ -83,7 +84,19 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        exoPlayer.pause()
+        viewModel.dispatch(MainUserAction.ActivityPaused)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val hasLocationPermission = permissionManager.hasPermissions(
+            this,
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            )
+        )
+        viewModel.dispatch(MainUserAction.ActivityResumed(hasLocationPermission))
     }
 
     override fun onDestroy() {
@@ -110,10 +123,13 @@ class MainActivity : AppCompatActivity() {
 
     // region Private methods
     private fun handleSideEffect(sideEffect: MainSideEffect) {
+        Log.d("SideEffect", sideEffect.javaClass.simpleName)
         when (sideEffect) {
             is MainSideEffect.LoadVideo -> preparePlayer(sideEffect.videoUrl)
-            MainSideEffect.PauseVideo -> exoPlayer.pause()
-            MainSideEffect.PlayVideo -> exoPlayer.play()
+            is MainSideEffect.PauseVideo -> exoPlayer.pause()
+            is MainSideEffect.PlayVideo -> exoPlayer.play()
+            is MainSideEffect.PauseLocationUpdates -> stopLocationUpdates()
+            is MainSideEffect.StartLocationUpdates -> startLocationUpdates()
         }
     }
 
@@ -154,6 +170,10 @@ class MainActivity : AppCompatActivity() {
             locationCallback,
             Looper.getMainLooper()
         )
+    }
+
+    private fun stopLocationUpdates() {
+        fusedLocationClient.removeLocationUpdates(locationCallback)
     }
 
     private fun handleTiltState(state: TiltSensorState) = when (state) {
