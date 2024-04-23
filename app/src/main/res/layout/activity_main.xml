@@ -14,48 +14,85 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         app:show_subtitle_button="false"
-        app:layout_constraintTop_toTopOf="parent" />
+        tools:visibility="gone" />
 
     <FrameLayout
         android:id="@+id/frameRewindIndicator"
-        android:layout_width="48dp"
+        android:layout_width="@dimen/indicator_height"
         android:layout_height="0dp"
-        android:background="@color/white"
+        android:background="@drawable/shape_gradient_indicator_horizontal"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_rewind" />
+    </FrameLayout>
 
     <FrameLayout
         android:id="@+id/frameFastForwardIndicator"
-        android:layout_width="48dp"
+        android:layout_width="@dimen/indicator_height"
         android:layout_height="0dp"
-        android:background="@color/white"
+        android:background="@drawable/shape_gradient_indicator_horizontal"
+        android:rotation="180"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:rotation="180"
+            android:src="@drawable/ic_fast_forward" />
+    </FrameLayout>
 
     <FrameLayout
         android:id="@+id/frameVolumeUpIndicator"
         android:layout_width="0dp"
-        android:layout_height="48dp"
-        android:background="@color/white"
+        android:layout_height="@dimen/indicator_height"
+        android:background="@drawable/shape_gradient_indicator_vertical"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_volume_up" />
+    </FrameLayout>
 
     <FrameLayout
         android:id="@+id/frameVolumeDownIndicator"
         android:layout_width="0dp"
-        android:layout_height="48dp"
-        android:background="@color/white"
+        android:layout_height="@dimen/indicator_height"
+        android:background="@drawable/shape_gradient_indicator_vertical"
+        android:rotation="180"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        tools:visibility="visible">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:rotation="180"
+            android:src="@drawable/ic_volume_down" />
+    </FrameLayout>
 
     <Button
         android:id="@+id/buttonResetViewpoint"

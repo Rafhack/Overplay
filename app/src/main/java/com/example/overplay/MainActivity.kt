@@ -101,20 +101,20 @@ class MainActivity : AppCompatActivity() {
 
     // region Player methods
     private fun createPlayer() = ExoPlayer.Builder(this)
-        .setSeekBackIncrementMs(100L)
-        .setSeekForwardIncrementMs(100L)
+        .setSeekBackIncrementMs(PLAYER_SEEK_INTERVAL)
+        .setSeekForwardIncrementMs(PLAYER_SEEK_INTERVAL)
         .build()
 
     private fun volumeUp() = with(binding) {
         hideIndicators()
         frameVolumeUpIndicator.isVisible = true
-        exoPlayer.volume += .05F
+        exoPlayer.volume += PLAYER_VOLUME_INTERVAL
     }
 
     private fun volumeDown() = with(binding) {
         hideIndicators()
         frameVolumeDownIndicator.isVisible = true
-        exoPlayer.volume -= .05F
+        exoPlayer.volume -= PLAYER_VOLUME_INTERVAL
     }
 
     private fun rewind() = with(binding) {
@@ -190,4 +190,9 @@ class MainActivity : AppCompatActivity() {
     }
     // endregion
     // endregion
+
+    companion object {
+        private const val PLAYER_VOLUME_INTERVAL = .05F
+        private const val PLAYER_SEEK_INTERVAL = 200L
+    }
 }

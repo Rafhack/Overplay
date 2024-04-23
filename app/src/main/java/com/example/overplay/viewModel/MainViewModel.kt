@@ -31,6 +31,9 @@ class MainViewModel : BaseViewModel<MainUserAction, MainSideEffect, MainViewStat
 
     private suspend fun updatePlaybackState(playbackState: Int) {
         updateState { copy(playbackState = playbackState) }
+        if (playbackState == Player.STATE_READY) {
+            emitSideEffect(MainSideEffect.PlayVideo)
+        }
     }
 
     private suspend fun updatePlayingState(isPlaying: Boolean) {
