@@ -45,6 +45,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.exoplayer)
     implementation(libs.media3.ui)
+    implementation(libs.location)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

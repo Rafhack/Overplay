@@ -1,5 +1,6 @@
 package com.example.overplay.ui.main
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
 import android.hardware.Sensor
@@ -7,6 +8,8 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
+import android.os.Looper
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -16,15 +19,24 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import com.example.overplay.R
+import com.example.overplay.databinding.ActivityMainBinding
+import com.example.overplay.helpers.PermissionManager
+import com.example.overplay.helpers.ShakeDetector
 import com.example.overplay.ui.main.viewModel.MainSideEffect
 import com.example.overplay.ui.main.viewModel.MainUserAction
+import com.example.overplay.ui.main.viewModel.MainViewModel
 import com.example.overplay.ui.main.viewModel.MainViewState
 import com.example.overplay.ui.main.viewModel.MainViewState.TiltSensorData.TiltSensorState
-import com.example.overplay.helpers.ShakeDetector
-import com.example.overplay.databinding.ActivityMainBinding
-import com.example.overplay.ui.main.viewModel.MainViewModel
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import kotlinx.coroutines.launch
 
 @UnstableApi
@@ -33,9 +45,13 @@ class MainActivity : AppCompatActivity() {
     // region Global variables
     private lateinit var binding: ActivityMainBinding
     private lateinit var shakeDetector: ShakeDetector
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var locationCallback: LocationCallback
+
 
     private val sensorManager by lazy { getSystemService(Context.SENSOR_SERVICE) as SensorManager }
     private val exoPlayer by lazy { createPlayer() }
+    private val permissionManager by lazy { PermissionManager(this) }
     private val viewModel: MainViewModel by viewModels()
     // endregion
 
@@ -44,6 +60,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
         setContentView(binding.root)
 
         val rotation = ContextCompat.getDisplayOrDefault(this).rotation
@@ -56,6 +74,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        requestLocationPermission()
         initGyroscope()
         initShakeDetector()
         initPlayer()
@@ -78,6 +97,15 @@ class MainActivity : AppCompatActivity() {
         val rotation = ContextCompat.getDisplayOrDefault(this).rotation
         viewModel.dispatch(MainUserAction.OrientationChanged(rotation))
     }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray,
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        permissionManager.onRequestResult(this, requestCode, grantResults)
+    }
     // endregion
 
     // region Private methods
@@ -91,6 +119,41 @@ class MainActivity : AppCompatActivity() {
 
     private fun renderViewState(viewState: MainViewState) {
         handleTiltState(viewState.tiltSensorData.tiltState)
+    }
+
+    private fun requestLocationPermission() {
+        val callback: PermissionManager.PermissionResultCallback =
+            object : PermissionManager.PermissionResultCallback {
+                override fun onPermissionGranted() {
+                    initLocationCallback()
+                    startLocationUpdates()
+                }
+
+                override fun onPermissionDenied() {
+                    Toast.makeText(this@MainActivity, R.string.continuing_without_location, Toast.LENGTH_SHORT).show()
+                }
+            }
+        permissionManager.checkAndRequestLocationPermission(this, callback)
+    }
+
+    private fun initLocationCallback() {
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+                locationResult.lastLocation
+            }
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun startLocationUpdates() {
+        fusedLocationClient.requestLocationUpdates(
+            LocationRequest.Builder(
+                Priority.PRIORITY_HIGH_ACCURACY,
+                LOCATION_REQUEST_INTERVAL
+            ).build(),
+            locationCallback,
+            Looper.getMainLooper()
+        )
     }
 
     private fun handleTiltState(state: TiltSensorState) = when (state) {
@@ -210,5 +273,6 @@ class MainActivity : AppCompatActivity() {
         private const val PLAYER_VOLUME_INTERVAL = .05F
         private const val PLAYER_SEEK_INTERVAL = 200L
         private const val PLAYER_CONTROLS_TIMEOUT = 1000
+        private const val LOCATION_REQUEST_INTERVAL = 500L
     }
 }

@@ -46,7 +46,7 @@ class PermissionManager(context: Activity) {
         }
     }
 
-    fun checkAndRequestBluetoothPermission(
+    fun checkAndRequestLocationPermission(
         activity: AppCompatActivity,
         grantedCallback: PermissionResultCallback?,
     ) {
@@ -54,7 +54,7 @@ class PermissionManager(context: Activity) {
         if (!AndroidVersion.isAndroidS) {
             currentGrantedCallback?.onPermissionGranted()
         } else {
-            val permissions = arrayOf(permission.BLUETOOTH_CONNECT, permission.BLUETOOTH_SCAN)
+            val permissions = arrayOf(permission.ACCESS_COARSE_LOCATION, permission.ACCESS_FINE_LOCATION)
             if (!hasPermissions(activity, permissions)) {
                 ActivityCompat.requestPermissions(activity, permissions, ANDROID_PERMISSION_REQUEST)
             } else {
