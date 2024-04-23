@@ -76,10 +76,10 @@ class SensorUseCase {
         zAxisData: MainViewState.TiltSensorData.AxisData,
     ): Pair<MainViewState.TiltSensorData.AxisData, MainViewState.TiltSensorData.AxisData> {
         return when (orientation) {
-            Surface.ROTATION_0 -> xAxisData
-            Surface.ROTATION_90 -> yAxisData.invert()
-            Surface.ROTATION_180 -> xAxisData.invert()
-            else -> yAxisData
+            Surface.ROTATION_0 -> xAxisData              // Portrait
+            Surface.ROTATION_90 -> yAxisData.invert()    // Landscape
+            Surface.ROTATION_180 -> xAxisData.invert()   // Reverse Portrait
+            else -> yAxisData                            // Reverse Landscape
         } to when (orientation) {
             Surface.ROTATION_0 -> yAxisData
             Surface.ROTATION_90 -> zAxisData

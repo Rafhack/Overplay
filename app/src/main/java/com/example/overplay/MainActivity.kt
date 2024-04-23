@@ -58,6 +58,11 @@ class MainActivity : AppCompatActivity() {
         setupListeners()
     }
 
+    override fun onPause() {
+        super.onPause()
+        exoPlayer.pause()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         shakeDetector.stop()
@@ -139,6 +144,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun initPlayer() = with(binding) {
         playerView.player = exoPlayer
+        playerView.setShowPreviousButton(false)
+        playerView.setShowNextButton(false)
+        playerView.setShowRewindButton(false)
+        playerView.setShowFastForwardButton(false)
+        playerView.controllerShowTimeoutMs = PLAYER_CONTROLS_TIMEOUT
+        exoPlayer.playWhenReady = true
 
         exoPlayer.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(playbackState: Int) {
@@ -176,7 +187,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Uses the [ShakeDetector] class from Square's library Seismic
+     * Uses the [ShakeDetector] class from Square's library Seismic.
      * Slightly modified to return the timestamp for each shake, so
      * we can ignore shake events too close from one another
      * */
@@ -194,5 +205,6 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val PLAYER_VOLUME_INTERVAL = .05F
         private const val PLAYER_SEEK_INTERVAL = 200L
+        private const val PLAYER_CONTROLS_TIMEOUT = 1000
     }
 }

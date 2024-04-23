@@ -1,6 +1,5 @@
 package com.example.overplay.viewModel
 
-import android.util.Log
 import androidx.media3.common.Player
 import com.example.overplay.MainSideEffect
 import com.example.overplay.MainUserAction
@@ -31,9 +30,6 @@ class MainViewModel : BaseViewModel<MainUserAction, MainSideEffect, MainViewStat
 
     private suspend fun updatePlaybackState(playbackState: Int) {
         updateState { copy(playbackState = playbackState) }
-        if (playbackState == Player.STATE_READY) {
-            emitSideEffect(MainSideEffect.PlayVideo)
-        }
     }
 
     private suspend fun updatePlayingState(isPlaying: Boolean) {
@@ -41,7 +37,6 @@ class MainViewModel : BaseViewModel<MainUserAction, MainSideEffect, MainViewStat
     }
 
     private suspend fun handleDeviceShakeEvent(currentTimestamp: Long) = with(stateFlow.value) {
-        Log.d("Shake", "Shaken")
         val deltaTime = currentTimestamp - stateFlow.value.lastShakeEventTimestamp
         updateState { copy(lastShakeEventTimestamp = currentTimestamp) }
         if (deltaTime < MIN_SHAKE_INTERVAL || playbackState != Player.STATE_READY) return

@@ -50,11 +50,12 @@ data class MainViewState(
     }
 }
 
-@Suppress("ArrayInDataClass")
 sealed class MainUserAction {
     data class ViewScreen(val orientation: Int) : MainUserAction()
 
     data class OrientationChanged(val orientation: Int) : MainUserAction()
+
+    @Suppress("ArrayInDataClass")
     data class SensorChanged(val sensorValues: FloatArray) : MainUserAction()
     data class DeviceShaken(val timestamp: Long) : MainUserAction()
 
