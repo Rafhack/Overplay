@@ -1,10 +1,13 @@
 <resources>
     <string name="app_name">Overplay</string>
     <string name="set_viewpoint">Set viewpoint</string>
+    <string name="toggle_debug_panel">Debug panel</string>
 
     <string name="permission_settings_dialog_title">Allow location access</string>
     <string name="permission_settings_dialog_message">To proceed, please allow the access to location in your settings</string>
     <string name="permission_settings_dialog_open">Open settings</string>
     <string name="permission_settings_dialog_cancel">Cancel</string>
     <string name="continuing_without_location">Continuing without location features</string>
+    <string name="debug_tilt_offset">X: %1$f, Y: %2$f, Z: %3$f</string>
+    <string name="debug_location_distance">Distance: %1$f</string>
 </resources>

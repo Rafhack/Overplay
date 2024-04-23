@@ -4,7 +4,7 @@ import android.location.Location
 import android.util.Log
 import androidx.media3.common.Player
 import com.example.overplay.domain.SensorUseCase
-import com.example.overplay.ui.main.viewModel.MainViewState.TiltSensorData.TiltSensorState
+import com.example.overplay.model.TiltSensorData
 
 class MainViewModel : BaseViewModel<MainUserAction, MainSideEffect, MainViewState>(
     MainViewState.INITIAL_STATE
@@ -24,6 +24,7 @@ class MainViewModel : BaseViewModel<MainUserAction, MainSideEffect, MainViewStat
         is MainUserAction.ActivityResumed -> resumeVideoAndLocation(action.hasLocationPermission)
         is MainUserAction.LocationUpdated -> checkForLocationDistance(action.location)
         is MainUserAction.OnLocationPermissionGranted -> emitSideEffect(MainSideEffect.StartLocationUpdates)
+        is MainUserAction.DebugPanelPressed -> toggleDebugPanel()
     }
 
     private suspend fun startup(orientation: Int) {
@@ -31,11 +32,16 @@ class MainViewModel : BaseViewModel<MainUserAction, MainSideEffect, MainViewStat
         emitSideEffect(MainSideEffect.LoadVideo(VIDEO_URL))
     }
 
+    private suspend fun toggleDebugPanel() {
+        updateState { copy(isDebugPanelVisible = !isDebugPanelVisible) }
+    }
+
     private suspend fun checkForLocationDistance(currentLocation: Location?) {
         currentLocation?.let {
             val lastLocation = stateFlow.value.lastLocation
             if (lastLocation != null) {
                 val distance = lastLocation.distanceTo(currentLocation)
+                updateState { copy(lastLocationDistance = distance) }
                 if (distance >= LOCATION_DISTANCE_TRIGGER) {
                     emitSideEffect(MainSideEffect.PauseVideo)
                     updateState { copy(lastLocation = currentLocation) }
@@ -91,7 +97,7 @@ class MainViewModel : BaseViewModel<MainUserAction, MainSideEffect, MainViewStat
     }
 
     private suspend fun setViewPoint() = updateState {
-        copy(tiltSensorData = tiltSensorData.copy(isInitialized = false, tiltState = TiltSensorState.IDLE))
+        copy(tiltSensorData = tiltSensorData.copy(isInitialized = false, tiltState = TiltSensorData.TiltSensorState.IDLE))
     }
 
     private suspend fun updateSensorData(sensorValues: FloatArray) = updateState {

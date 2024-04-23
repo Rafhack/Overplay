@@ -3,7 +3,7 @@ package com.example.overplay.ui.main.viewModel
 import android.location.Location
 import android.view.Surface
 import androidx.media3.common.Player
-import com.example.overplay.ui.main.viewModel.MainViewState.TiltSensorData.TiltSensorState
+import com.example.overplay.model.TiltSensorData
 
 data class MainViewState(
     val tiltSensorData: TiltSensorData,
@@ -12,30 +12,10 @@ data class MainViewState(
     val isVideoPlaying: Boolean,
     val lastShakeEventTimestamp: Long,
     val isLocationInitialized: Boolean,
-    val lastLocation: Location?
+    val lastLocation: Location?,
+    val lastLocationDistance: Float,
+    val isDebugPanelVisible: Boolean
 ) {
-    data class TiltSensorData(
-        val isInitialized: Boolean,
-        val xAxisData: AxisData,
-        val yAxisData: AxisData,
-        val zAxisData: AxisData,
-        val tiltState: TiltSensorState,
-    ) {
-        enum class TiltSensorState {
-            TILTING_LEFT,
-            TILTING_RIGHT,
-            TILTING_UP,
-            TILTING_DOWN,
-            IDLE
-        }
-
-        data class AxisData(
-            val current: Float = 0F,
-            val origin: Float = 0F,
-            val offset: Float = 0F
-        )
-    }
-
     companion object {
         val INITIAL_STATE = MainViewState(
             playbackState = Player.STATE_IDLE,
@@ -44,12 +24,14 @@ data class MainViewState(
             isLocationInitialized = false,
             orientation = Surface.ROTATION_0,
             lastLocation = null,
+            lastLocationDistance = 0F,
+            isDebugPanelVisible = false,
             tiltSensorData = TiltSensorData(
                 isInitialized = false,
                 xAxisData = TiltSensorData.AxisData(),
                 yAxisData = TiltSensorData.AxisData(),
                 zAxisData = TiltSensorData.AxisData(),
-                tiltState = TiltSensorState.IDLE
+                tiltState = TiltSensorData.TiltSensorState.IDLE
             )
         )
     }
@@ -69,6 +51,8 @@ sealed class MainUserAction {
     data class IsPlayingChanged(val isPlaying: Boolean) : MainUserAction()
 
     data object SetViewpointPressed : MainUserAction()
+
+    data object DebugPanelPressed : MainUserAction()
 
     data object ActivityPaused : MainUserAction()
 

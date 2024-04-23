@@ -4,105 +4,154 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
     android:fitsSystemWindows="true"
     tools:context=".ui.main.MainActivity">
 
-    <androidx.media3.ui.PlayerView
-        android:id="@+id/playerView"
+    <LinearLayout
+        android:id="@+id/linearDebugPanel"
         android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:show_subtitle_button="false"
-        tools:visibility="gone" />
-
-    <FrameLayout
-        android:id="@+id/frameRewindIndicator"
-        android:layout_width="@dimen/indicator_height"
-        android:layout_height="0dp"
-        android:background="@drawable/shape_gradient_indicator_horizontal"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:visibility="visible">
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:src="@drawable/ic_rewind" />
-    </FrameLayout>
-
-    <FrameLayout
-        android:id="@+id/frameFastForwardIndicator"
-        android:layout_width="@dimen/indicator_height"
-        android:layout_height="0dp"
-        android:background="@drawable/shape_gradient_indicator_horizontal"
-        android:rotation="180"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:visibility="visible">
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:rotation="180"
-            android:src="@drawable/ic_fast_forward" />
-    </FrameLayout>
-
-    <FrameLayout
-        android:id="@+id/frameVolumeUpIndicator"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/indicator_height"
-        android:background="@drawable/shape_gradient_indicator_vertical"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:visibility="visible">
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:src="@drawable/ic_volume_up" />
-    </FrameLayout>
-
-    <FrameLayout
-        android:id="@+id/frameVolumeDownIndicator"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/indicator_height"
-        android:background="@drawable/shape_gradient_indicator_vertical"
-        android:rotation="180"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:visibility="visible">
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:rotation="180"
-            android:src="@drawable/ic_volume_down" />
-    </FrameLayout>
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/buttonSetViewpoint"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="24dp"
-        android:drawablePadding="8dp"
-        android:text="@string/set_viewpoint"
-        app:icon="@drawable/ic_viewpoint"
+        android:background="@color/black"
+        android:orientation="vertical"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/textTiltOffset"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:textColor="@color/green" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/textDistance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:textColor="@color/green" />
+
+    </LinearLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:animateLayoutChanges="false"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/linearDebugPanel">
+
+        <androidx.media3.ui.PlayerView
+            android:id="@+id/playerView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:show_subtitle_button="false"
+            tools:visibility="gone" />
+
+        <FrameLayout
+            android:id="@+id/frameRewindIndicator"
+            android:layout_width="@dimen/indicator_height"
+            android:layout_height="0dp"
+            android:background="@drawable/shape_gradient_indicator_horizontal"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_rewind" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/frameFastForwardIndicator"
+            android:layout_width="@dimen/indicator_height"
+            android:layout_height="0dp"
+            android:background="@drawable/shape_gradient_indicator_horizontal"
+            android:rotation="180"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:rotation="180"
+                android:src="@drawable/ic_fast_forward" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/frameVolumeUpIndicator"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/indicator_height"
+            android:background="@drawable/shape_gradient_indicator_vertical"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_volume_up" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/frameVolumeDownIndicator"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/indicator_height"
+            android:background="@drawable/shape_gradient_indicator_vertical"
+            android:rotation="180"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:visibility="visible">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:rotation="180"
+                android:src="@drawable/ic_volume_down" />
+        </FrameLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonSetViewpoint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="24dp"
+            android:drawablePadding="8dp"
+            android:text="@string/set_viewpoint"
+            app:icon="@drawable/ic_viewpoint"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/frameVolumeUpIndicator" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonDebugPanel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="24dp"
+            android:drawablePadding="8dp"
+            android:text="@string/toggle_debug_panel"
+            app:icon="@drawable/ic_debug"
+            app:layout_constraintEnd_toStartOf="@id/buttonSetViewpoint"
+            app:layout_constraintTop_toBottomOf="@id/frameVolumeUpIndicator" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -27,11 +27,11 @@ import com.example.overplay.R
 import com.example.overplay.databinding.ActivityMainBinding
 import com.example.overplay.helpers.PermissionManager
 import com.example.overplay.helpers.ShakeDetector
+import com.example.overplay.model.TiltSensorData.TiltSensorState
 import com.example.overplay.ui.main.viewModel.MainSideEffect
 import com.example.overplay.ui.main.viewModel.MainUserAction
 import com.example.overplay.ui.main.viewModel.MainViewModel
 import com.example.overplay.ui.main.viewModel.MainViewState
-import com.example.overplay.ui.main.viewModel.MainViewState.TiltSensorData.TiltSensorState
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -135,6 +135,18 @@ class MainActivity : AppCompatActivity() {
 
     private fun renderViewState(viewState: MainViewState) {
         handleTiltState(viewState.tiltSensorData.tiltState)
+        renderDebugPanel(viewState)
+    }
+
+    private fun renderDebugPanel(viewState: MainViewState) = with(binding) {
+        linearDebugPanel.isVisible = viewState.isDebugPanelVisible
+        textTiltOffset.text = getString(
+            R.string.debug_tilt_offset,
+            viewState.tiltSensorData.xAxisData.offset,
+            viewState.tiltSensorData.yAxisData.offset,
+            viewState.tiltSensorData.zAxisData.offset,
+        )
+        textDistance.text = getString(R.string.debug_location_distance, viewState.lastLocationDistance)
     }
 
     private fun requestLocationPermission() {
@@ -255,6 +267,9 @@ class MainActivity : AppCompatActivity() {
     private fun setupListeners() = with(binding) {
         buttonSetViewpoint.setOnClickListener {
             viewModel.dispatch(MainUserAction.SetViewpointPressed)
+        }
+        buttonDebugPanel.setOnClickListener {
+            viewModel.dispatch(MainUserAction.DebugPanelPressed)
         }
     }
 

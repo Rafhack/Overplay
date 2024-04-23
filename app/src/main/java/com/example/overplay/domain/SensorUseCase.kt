@@ -2,16 +2,16 @@ package com.example.overplay.domain
 
 import android.hardware.SensorManager
 import android.view.Surface
-import com.example.overplay.ui.main.viewModel.MainViewState
-import com.example.overplay.ui.main.viewModel.MainViewState.TiltSensorData.TiltSensorState
+import com.example.overplay.model.TiltSensorData
+import com.example.overplay.model.TiltSensorData.TiltSensorState
 
 class SensorUseCase {
 
     fun updateSensorData(
         sensorValues: FloatArray,
         orientation: Int,
-        tiltSensorData: MainViewState.TiltSensorData
-    ): MainViewState.TiltSensorData {
+        tiltSensorData: TiltSensorData
+    ): TiltSensorData {
         with(tiltSensorData) {
 
             val rotationValues = getRotation(sensorValues)
@@ -61,10 +61,10 @@ class SensorUseCase {
         )
     }
 
-    private fun MainViewState.TiltSensorData.AxisData.updateAxisData(
+    private fun TiltSensorData.AxisData.updateAxisData(
         sensorValue: Float,
         isInitialized: Boolean
-    ): MainViewState.TiltSensorData.AxisData {
+    ): TiltSensorData.AxisData {
         val origin = if (isInitialized) origin else sensorValue
         val offset = sensorValue - origin
         return copy(current = sensorValue, origin = origin, offset = offset)
@@ -72,10 +72,10 @@ class SensorUseCase {
 
     private fun getAxisByOrientation(
         orientation: Int,
-        xAxisData: MainViewState.TiltSensorData.AxisData,
-        yAxisData: MainViewState.TiltSensorData.AxisData,
-        zAxisData: MainViewState.TiltSensorData.AxisData,
-    ): Pair<MainViewState.TiltSensorData.AxisData, MainViewState.TiltSensorData.AxisData> {
+        xAxisData: TiltSensorData.AxisData,
+        yAxisData: TiltSensorData.AxisData,
+        zAxisData: TiltSensorData.AxisData,
+    ): Pair<TiltSensorData.AxisData, TiltSensorData.AxisData> {
         return when (orientation) {
             Surface.ROTATION_0 -> xAxisData              // Portrait
             Surface.ROTATION_90 -> yAxisData.invert()    // Landscape
@@ -89,7 +89,7 @@ class SensorUseCase {
         }
     }
 
-    private fun MainViewState.TiltSensorData.AxisData.invert(): MainViewState.TiltSensorData.AxisData {
+    private fun TiltSensorData.AxisData.invert(): TiltSensorData.AxisData {
         return copy(current = -current, origin = -origin, offset = -offset)
     }
 
